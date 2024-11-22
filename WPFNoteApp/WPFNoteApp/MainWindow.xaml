@@ -1,0 +1,27 @@
+﻿<Window x:Class="WPFNoteApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Note App" Height="450" Width="800">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Tiêu đề ghi chú -->
+        <TextBox x:Name="TitleTextBox" FontSize="16" FontWeight="Bold" Margin="0,0,0,10" 
+                  VerticalAlignment="Center"/>
+
+        <!-- Nội dung ghi chú -->
+        <RichTextBox x:Name="ContentRichTextBox" Grid.Row="1" Margin="0,10" VerticalScrollBarVisibility="Auto"/>
+
+        <!-- Các nút chức năng -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10">
+            <Button x:Name="NewButton" Content="New" Width="80" Margin="5" Click="NewButton_Click"/>
+            <Button x:Name="SaveButton" Content="Save" Width="80" Margin="5" Click="SaveButton_Click"/>
+            <Button x:Name="OpenButton" Content="Open" Width="80" Margin="5" Click="OpenButton_Click"/>
+            <Button x:Name="HighlightButton" Content="Highlight" Width="80" Margin="5" Click="HighlightButton_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>
