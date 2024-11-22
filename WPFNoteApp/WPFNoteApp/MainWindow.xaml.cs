@@ -32,50 +32,94 @@ namespace WPFNoteApp
             ContentRichTextBox.Document.Blocks.Clear();
         }
 
-        // Lưu ghi chú vào file JSON
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
+            // Tạo ghi chú từ giao diện
             var note = new Note
             {
                 Title = TitleTextBox.Text,
                 Content = new TextRange(ContentRichTextBox.Document.ContentStart, ContentRichTextBox.Document.ContentEnd).Text
             };
 
+            // Hộp thoại lưu file
             SaveFileDialog saveFileDialog = new SaveFileDialog
             {
-                Filter = "JSON files (*.json)|*.json"
+                Filter = "JSON files (*.json)|*.json|Text files (*.txt)|*.txt"
             };
 
             if (saveFileDialog.ShowDialog() == true)
             {
-                string json = JsonSerializer.Serialize(note, new JsonSerializerOptions { WriteIndented = true });
-                File.WriteAllText(saveFileDialog.FileName, json);
-                MessageBox.Show("Ghi chú đã được lưu!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                string filePath = saveFileDialog.FileName;
+
+                // Kiểm tra định dạng file
+                if (filePath.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Lưu dưới dạng JSON
+                    string json = JsonSerializer.Serialize(note, new JsonSerializerOptions { WriteIndented = true });
+                    File.WriteAllText(filePath, json);
+                    MessageBox.Show("Ghi chú đã được lưu dưới dạng JSON!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else if (filePath.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Lưu dưới dạng TXT
+                    string txtContent = $"Tiêu đề: {note.Title}\n\n{note.Content}";
+                    File.WriteAllText(filePath, txtContent);
+                    MessageBox.Show("Ghi chú đã được lưu dưới dạng TXT!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else
+                {
+                    MessageBox.Show("Định dạng không được hỗ trợ!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 
-        // Mở ghi chú từ file JSON
+
         private void OpenButton_Click(object sender, RoutedEventArgs e)
         {
+            // Hộp thoại mở file
             OpenFileDialog openFileDialog = new OpenFileDialog
             {
-                Filter = "JSON files (*.json)|*.json"
+                Filter = "JSON files (*.json)|*.json|Text files (*.txt)|*.txt"
             };
 
             if (openFileDialog.ShowDialog() == true)
             {
-                string json = File.ReadAllText(openFileDialog.FileName);
-                var note = JsonSerializer.Deserialize<Note>(json);
+                string filePath = openFileDialog.FileName;
 
-                if (note != null)
+                if (filePath.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
                 {
-                    TitleTextBox.Text = note.Title;
+                    // Đọc và xử lý file JSON
+                    string json = File.ReadAllText(filePath);
+                    var note = JsonSerializer.Deserialize<Note>(json);
+
+                    if (note != null)
+                    {
+                        TitleTextBox.Text = note.Title;
+
+                        ContentRichTextBox.Document.Blocks.Clear();
+                        ContentRichTextBox.Document.Blocks.Add(new Paragraph(new Run(note.Content)));
+                    }
+                }
+                else if (filePath.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Đọc và xử lý file TXT
+                    string txtContent = File.ReadAllText(filePath);
+
+                    // Tách tiêu đề và nội dung (giả định tiêu đề nằm trên dòng đầu tiên)
+                    string[] lines = txtContent.Split(new[] { '\n' }, 2); // Chia thành 2 phần
+                    TitleTextBox.Text = lines.Length > 0 ? lines[0].Replace("Tiêu đề: ", "").Trim() : "";
+                    string content = lines.Length > 1 ? lines[1].Trim() : "";
 
                     ContentRichTextBox.Document.Blocks.Clear();
-                    ContentRichTextBox.Document.Blocks.Add(new Paragraph(new Run(note.Content)));
+                    ContentRichTextBox.Document.Blocks.Add(new Paragraph(new Run(content)));
+                }
+                else
+                {
+                    MessageBox.Show("Định dạng file không được hỗ trợ!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
+
 
         // Highlight văn bản được chọn
         private void HighlightButton_Click(object sender, RoutedEventArgs e)
